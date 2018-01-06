@@ -13,6 +13,7 @@ var log = bunyan.createLogger({
     period: '1d',
     count: 30,
    path: './'+date+'_'+name+'.log',
+   level: "trace"
    }]
  });
 

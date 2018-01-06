@@ -1,8 +1,9 @@
 const Trader = require("./Trader");
-var argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2));
 const log = require("./log");
 
 const config = require("./config.local");
+log.debug("----- ----- ----- ----- ----- -----");
 log.info("Command arguments: ", argv);
 
 const isDebug = argv.debug || false;
