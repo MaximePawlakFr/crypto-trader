@@ -7,10 +7,21 @@
 ** if some buy / some sell, handle that
 
 ```
-node index.js --action buyMarket --high 0.015 --low -0.05
-```
-```
-node index.js --action buyMarket --debug
+node index.js --action buy --high 0.015 --low 0.05
 ```
 
-node index.js --action buyMarket
+```
+node index.js --action buy --debug
+```
+
+```
+node index.js --action buy
+```
+
+```
+node index.js --action sellIfLowPrice --low 0.01
+```
+
+```
+node index.js --action sellIfLowPrice
+```
