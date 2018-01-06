@@ -1,18 +1,6 @@
 const Trader = require("./Trader");
 var argv = require('minimist')(process.argv.slice(2));
-var bunyan = require('bunyan');
-var log = bunyan.createLogger({
-  name: 'btc-trader',
-  streams: [{
-    stream: process.stdout
-  },
-    {
-    type: 'rotating-file',
-    period: '1d',
-    count: 30,
-   path: './log.log',
-   }]
- });
+const log = require("./log");
 
 const config = require("./config.local");
 log.info("Command arguments: ", argv);
@@ -27,7 +15,7 @@ if(argv.action){
     low_percentage: -argv.low || null
   };
   const trader  = new Trader(options);
-  
+
   switch(argv.action){
     case "buy":
       log.info("## buy ##");
