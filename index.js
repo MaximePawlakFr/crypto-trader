@@ -1,9 +1,5 @@
-var Bitstamp = require('bitstamp');
-const moment = require('moment');
-const config = require("./config.local");
 const Trader = require("./Trader");
-var bitstamp = new Bitstamp(config.key, config.secret, config.client_id);
-var fs = require('fs');
+var argv = require('minimist')(process.argv.slice(2));
 var bunyan = require('bunyan');
 var log = bunyan.createLogger({
   name: 'btc-trader',
@@ -17,15 +13,11 @@ var log = bunyan.createLogger({
    path: './log.log',
    }]
  });
-log.info('hi');
-log.warn({lang: 'fr', t:[1, 2, 3]}, 'au revoir');
 
-var argv = require('minimist')(process.argv.slice(2));
-// bitstamp.balance(null, console.log);
-log.info(argv)
+const config = require("./config.local");
+log.info("Command arguments: ", argv);
 
 const isDebug = argv.debug || false;
-log.info("isDebug: ",   isDebug)
 if(argv.action){
   let action = null;
   let options = {
@@ -35,6 +27,7 @@ if(argv.action){
     low_percentage: -argv.low || null
   };
   const trader  = new Trader(options);
+  
   switch(argv.action){
     case "buy":
       log.info("## buy ##");
