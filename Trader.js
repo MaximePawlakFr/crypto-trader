@@ -7,14 +7,22 @@ const log = require("./log");
 
 class Trader {
   constructor( options={} ){
-    console.log(options);
+    log.debug("-- Trader --");
+    log.debug("Options: ", options);
+
     this.isDebug = options.isDebug || false;
     this.high_percentage = options.high_percentage || 0.015;
     this.low_percentage = options.low_percentage || -0.04;
     this.market = options.market || "btceur";
+    log.debug("this.isDebug: ", this.isDebug);
+    log.debug("this.market: ", this.market);
+    log.debug("this.high_percentage: ", this.high_percentage);
+    log.debug("this.low_percentage: ", this.low_percentage);
 
     this.lastDataOrder = this.readTransactionFromFile();
-    console.log("lastBuyOrder: ", this.lastDataOrder);
+    log.debug("this.lastDataOrder: ", this.lastDataOrder);
+
+    log.debug("-- /Trader --")
   }
 
   getBalance(){
@@ -69,20 +77,6 @@ class Trader {
     });
   }
 
-  checkIfPositive(){
-    const self = this;
-    return this.getTicker()
-    .then( ticker => {
-      let res = false;
-      let max_price = (1 + this.high_percentage) * this.lastDataOrder.buy_transaction.price;
-      if(ticker.last > this.lastDataOrder.buy_transaction.price){
-        res = true;
-      }
-      console.log(`Is positive: ${res}. Price/price bought/Max_price ${ticker.last}/${this.lastDataOrder.buy_transaction.price}/${max_price}`);
-      return res
-    })
-  }
-
   checkIfLowSell(){
     return this.getTicker()
     .then( ticker => {
@@ -111,9 +105,9 @@ class Trader {
         let fee = this.fee + 0.01;
         this.balance = balance * ( 1 - fee/100);
         this.amount = parseFloat((this.balance / this.price).toFixed(8));
-        log.debug("Price: ", this.price);
-        log.debug("limit_price: ", this.limit_price);
-        log.debug("Amount: ", this.amount);
+        log.info("price: ", this.price);
+        log.info("limit_price: ", this.limit_price);
+        log.info("amount: ", this.amount);
 
         if(this.isDebug){
           resolve(true);
@@ -322,9 +316,9 @@ class Trader {
   saveTransactionToFile(data){
     fs.writeFile("last_bid.json", JSON.stringify(data), function(err) {
       if(err) {
-        return console.err("Error writing file: ", err);
+        return log.error("Error writing file: ", err);
       }
-      console.log("The file was saved!");
+      log.debug("The file was saved!");
     });
   }
 }
