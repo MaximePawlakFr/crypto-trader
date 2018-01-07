@@ -12,32 +12,9 @@ class Trader {
     log.debug("-- /Trader --")
   }
 
-  getBalance(){
-    return new Promise((resolve, reject) => {
-      bitstamp.balance(this.market, (err, data) => {
-        resolve(data);
-      });
-    });
-  }
-
-  getTicker(){
-    return new Promise((resolve, reject) => {
-      bitstamp.ticker(this.market, (err, ticker) => {
-        resolve(ticker);
-      });
-    });
-  }
 
   getOpenOrders(){
     return this.marketTrader.getOpenBuyOrders();
-  }
-
-  getUserTransactions(){
-    return new Promise((resolve, reject) => {
-      bitstamp.user_transactions(this.market, (err, data) => {
-        resolve(data);
-      });
-    });
   }
 
   cancelOrder(id){
@@ -48,41 +25,9 @@ class Trader {
     });
   }
 
-  cancelAllOrders(){
-    return new Promise((resolve, reject) => {
-      if(this.isDebug){
-        resolve(true);
-        return;
-      }
-      bitstamp.cancel_all_orders((err, data) => {
-        resolve(data);
-      });
-    });
-  }
-
-  checkIfLowSell(){
-    return this.getTicker()
-    .then( ticker => {
-      let res = false;
-      this.low_price = (1 + this.low_percentage) * this.lastDataOrder.buy_transaction.price;
-      this.low_price = parseFloat(this.low_price.toFixed(2));
-      if(ticker.last < this.low_price){
-        res = true;
-      }
-      let percentage = (ticker.last - this.lastDataOrder.buy_transaction.price)/this.lastDataOrder.buy_transaction.price;
-      percentage = (percentage * 100).toFixed(2);
-      log.info(`CheckIfLowSell: ${res}`);
-      log.info(`Current %: ${percentage}%`);
-      log.info(`Actual/Low_price ${ticker.last}/${this.low_price}`);
-      return res
-    })
-  }
-
   getOpenBuyOrders(){
     return this.marketTrader.getOpenOrders();
   }
-
-
 
   buy(balance) {
     return new Promise((resolve, reject)=> {
@@ -199,6 +144,40 @@ class Trader {
       }
       return res;
     });
+  }
+
+  sellIfLowPrice(){
+    return this.marketTrader.checkIfLowSell()
+    .then( res => {
+      if(res){
+        log.info("Selling !");
+        return this.marketTrader.cancelAllOrders();
+      }
+    })
+    .then(res => {
+      if(res){
+        log.info("All orders cancelled: ");
+        log.info(res);
+        return this.marketTrader.sellMarket();
+      }
+    })
+    .then( res => {
+      if(res){
+        log.info("Sold Market: ");
+        log.info(res);
+        return Utils.sendSms(res);
+      }
+      return null;
+    })
+    .then(res => {
+      if(res){
+        log.debug("Sms sent successfully.");
+      }
+      return res;
+    })
+    .catch( err => {
+      log.error(err);
+    })
   }
 
   run(){

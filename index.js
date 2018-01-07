@@ -44,43 +44,13 @@ if(argv.action){
       trader.placeNewBuyOrder();
       break;
     case "sellIfLowPrice":
-      trader.checkIfLowSell()
-      .then( res => {
-        if(res){
-          log.info("Selling !");
-          return trader.cancelAllOrders();
-        }
-      })
-      .then(res => {
-        if(res){
-          log.info("All orders cancelled: ");
-          log.info(res);
-          return trader.sellMarket();
-        }
-      })
-      .then( res => {
-        if(res){
-          log.info("Sold Market: ");
-          log.info(res);
-          return Utils.sendSms(res);
-        }
-        return null;
-      })
-      .then(res => {
-        if(res){
-          log.debug("Sms sent successfully.");
-        }
-      })
-      .catch( err => {
-        log.error(err);
-      })
+      trader.sellIfLowPrice();
       break;
     case "sendSms":
       Utils.sendSms("Test")
       .then(res => {
         log.debug("Sms sent successfully.");
-        let t = new Trader()
-        Utils.sendSms(t.lastDataOrder);
+        Utils.sendSms("Salu", {t: [1,2]});
       })
       .catch( err => {
         log.error("Failed to send sms", err);
