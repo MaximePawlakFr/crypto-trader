@@ -47,10 +47,9 @@ if(argv.action){
       trader.sellIfLowPrice();
       break;
     case "sendSms":
-      Utils.sendSms("Test")
+      Utils.sendSms("Salu", {t: [1,2]})
       .then(res => {
         log.debug("Sms sent successfully.");
-        Utils.sendSms("Salu", {t: [1,2]});
       })
       .catch( err => {
         log.error("Failed to send sms", err);

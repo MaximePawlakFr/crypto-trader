@@ -106,7 +106,7 @@ class Trader {
   dailyBuy(){
     return this.marketTrader.dailyBuy()
     .then( data => {
-      return Utils.sendSms(data);
+      return Utils.sendSms("Buying", data);
     })
     .then(res => {
       log.debug("Sms sent successfully.");
@@ -165,7 +165,7 @@ class Trader {
       if(res){
         log.info("Sold Market: ");
         log.info(res);
-        return Utils.sendSms(res);
+        return Utils.sendSms("Selling", res);
       }
       return null;
     })
