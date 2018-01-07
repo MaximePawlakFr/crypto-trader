@@ -56,7 +56,8 @@ class Trader {
   dailyBuy(){
     return this.marketTrader.dailyBuy()
     .then( data => {
-      return Utils.sendSms("Buying", data);
+      let gain = this.marketTrader.getPotentialGain();
+      return Utils.sendSms(`Buying (${gain}eur)`, data);
     })
     .then(res => {
       log.debug("Sms sent successfully.");

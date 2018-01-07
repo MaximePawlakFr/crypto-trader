@@ -4,6 +4,7 @@ const config = require("./config.local");
 var bitstamp = new Bitstamp(config.key, config.secret, config.client_id);
 var fs = require('fs');
 const log = require("./log");
+const Utils = require("./Utils");
 
 class BitstampTrader {
   constructor( options={} ){
@@ -111,11 +112,13 @@ class BitstampTrader {
       this.getTicker()
       .then( ticker => {
         this.limit_price = (1 + this.high_percentage) * ticker.last;
-        this.limit_price = parseFloat(this.limit_price.toFixed(2));
+        this.limit_price = Utils.toFloat(this.limit_price);
         this.price = ticker.last;
+        this.balance = balance;
         let fee = this.fee + 0.01;
-        this.balance = balance * ( 1 - fee/100);
-        this.amount = parseFloat((this.balance / this.price).toFixed(8));
+        this.amountSpent = balance * ( 1 - fee/100);
+        this.amount = parseFloat((this.amountSpent / this.price).toFixed(8));
+        this.amountSpent = Utils.toFloat(this.amountSpent);
         log.info("price: ", this.price);
         log.info("limit_price: ", this.limit_price);
         log.info("amount: ", this.amount);
@@ -128,10 +131,6 @@ class BitstampTrader {
           if(err){
             reject(err);
           }
-          let transaction = {
-            data
-          }
-          this.saveTransactionToFile(transaction);
           resolve(data);
         });
       })
@@ -157,6 +156,21 @@ class BitstampTrader {
     let amount = this.lastDataOrder.buy_transaction.price * this.lastDataOrder.buy_transaction.amount;
     amount = parseFloat(amount.toFixed(2));
     return amount;
+  }
+
+  getPotentialGain(){
+    let amountSpent = this.amountSpent;
+
+    let limit_price = this.limit_price;
+    let amountReceived = limit_price * this.amount * (1 - this.fee/100);
+    amountReceived = Utils.toFloat(amountReceived);
+    let gain = amountReceived - amountSpent;
+    gain = Utils.toFloat(gain);
+    log.debug("amountSpent", amountSpent);
+    log.debug("limit_price", limit_price);
+    log.debug("amountReceived", amountReceived);
+    log.debug("gain", gain);
+    return gain;
   }
 
   buyMarket(balance) {
@@ -220,7 +234,9 @@ class BitstampTrader {
           high_percentage: this.high_percentage,
           low_percentage: this.low_percentage,
           fee: this.fee,
-          amount_spent: this.eur_available
+          amount_spent: this.eur_available,
+          limit_price: this.limit_price,
+          price: this.price
         },
         buy_transaction: data
       }
