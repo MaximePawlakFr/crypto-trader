@@ -37,6 +37,8 @@ if(argv.action){
         log.debug(orders);
       });
       break;
+    case "cancelAllOrders":
+      trader.cancelAllOrders();
     case "cancelOpenBuyOrders":
       trader.cancelOpenBuyOrders();
       break;
@@ -46,6 +48,15 @@ if(argv.action){
     case "sellIfLowPrice":
       trader.sellIfLowPrice();
       break;
+    case "getBalance":
+      trader.getBalance()
+      .then(res => {
+        log.info(res);
+      });
+      break;
+    case "sellMarket":
+      trader.sellMarket();
+      break;
     case "sendSms":
       Utils.sendSms("Salu", {t: [1,2]})
       .then(res => {
@@ -54,6 +65,9 @@ if(argv.action){
       .catch( err => {
         log.error("Failed to send sms", err);
       })
+      break;
+    case "reset":
+        trader.reset();
       break;
     default:
       log.info("## No action ##");

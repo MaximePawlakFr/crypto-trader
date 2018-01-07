@@ -138,13 +138,12 @@ class BitstampTrader {
     });
   }
 
-  sellMarket() {
+  sellMarket(amount) {
     return new Promise((resolve, reject)=> {
         if(this.isDebug){
           resolve(true);
           return;
         }
-        let amount = this.lastDataOrder.buy_transaction.amount;
         bitstamp.sellMarket(this.market, amount, (err, data)=>{
           if(err){
             reject(err);
@@ -154,16 +153,22 @@ class BitstampTrader {
       });
   }
 
+  getAmountSpent(){
+    let amount = this.lastDataOrder.buy_transaction.price * this.lastDataOrder.buy_transaction.amount;
+    amount = parseFloat(amount.toFixed(2));
+    return amount;
+  }
+
   buyMarket(balance) {
     return new Promise((resolve, reject)=> {
       this.getTicker()
       .then( ticker => {
         console.log(ticker);
         let price = ticker.last;
-        let fee = this.fee + 0.01
-        balance = parseFloat( (balance * (1 - fee/100)).toFixed(2));
-        let amount = parseFloat((balance / price).toFixed(8));
-        console.log("Balance: ", balance);
+        let fee = this.fee + 0.01;
+        let amountSpent = parseFloat( (balance * (1 - fee/100)).toFixed(2));
+        let amount = parseFloat((amountSpent / price).toFixed(8));
+        console.log("Balance: ", amountSpent);
         console.log("Price: ", price);
         console.log("Amount: ", amount);
 
@@ -205,6 +210,7 @@ class BitstampTrader {
     .then( data => {
       log.debug(data);
       if(!data || data.status == "error"){
+        throw (data);
         return;
       }
 
@@ -213,6 +219,8 @@ class BitstampTrader {
           market: this.market,
           high_percentage: this.high_percentage,
           low_percentage: this.low_percentage,
+          fee: this.fee,
+          amount_spent: this.eur_available
         },
         buy_transaction: data
       }

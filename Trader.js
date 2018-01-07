@@ -12,9 +12,12 @@ class Trader {
     log.debug("-- /Trader --")
   }
 
+  getBalance(){
+    return this.marketTrader.getBalance();
+  }
 
   getOpenOrders(){
-    return this.marketTrader.getOpenBuyOrders();
+    return this.marketTrader.getOpenOrders();
   }
 
   cancelOrder(id){
@@ -25,82 +28,29 @@ class Trader {
     });
   }
 
+  cancelAllOrders(){
+    log.info("cancelAllOrders");
+    return this.marketTrader.cancelAllOrders();
+  }
+
   getOpenBuyOrders(){
     return this.marketTrader.getOpenOrders();
   }
 
-  buy(balance) {
-    return new Promise((resolve, reject)=> {
-      this.getTicker()
-      .then( ticker => {
-        this.limit_price = (1 + this.high_percentage) * ticker.last;
-        this.limit_price = parseFloat(this.limit_price.toFixed(2));
-        this.price = ticker.last;
-        let fee = this.fee + 0.01;
-        this.balance = balance * ( 1 - fee/100);
-        this.amount = parseFloat((this.balance / this.price).toFixed(8));
-        log.info("price: ", this.price);
-        log.info("limit_price: ", this.limit_price);
-        log.info("amount: ", this.amount);
-
-        if(this.isDebug){
-          resolve(true);
-          return;
-        }
-        bitstamp.buy(this.market, this.amount, this.price, this.limit_price, (err, data)=>{
-          if(err){
-            reject(err);
-          }
-          let transaction = {
-            data
-          }
-          this.saveTransactionToFile(transaction);
-          resolve(data);
-        });
-      })
-    });
-  }
-
   sellMarket() {
-    return new Promise((resolve, reject)=> {
-        if(this.isDebug){
-          resolve(true);
-          return;
-        }
-        let amount = this.lastDataOrder.buy_transaction.amount;
-        bitstamp.sellMarket(this.market, amount, (err, data)=>{
-          if(err){
-            reject(err);
-          }
-          resolve(data);
-        });
-      });
-  }
-
-  buyMarket(balance) {
-    return new Promise((resolve, reject)=> {
-      this.getTicker()
-      .then( ticker => {
-        console.log(ticker);
-        let price = ticker.last;
-        let fee = this.fee + 0.01
-        balance = parseFloat( (balance * (1 - fee/100)).toFixed(2));
-        let amount = parseFloat((balance / price).toFixed(8));
-        console.log("Balance: ", balance);
-        console.log("Price: ", price);
-        console.log("Amount: ", amount);
-
-        if(this.isDebug){
-          resolve(true);
-        }
-        bitstamp.buyMarket(this.market, amount, (err, data)=>{
-          if(err){
-            reject(err);
-          }
-          resolve(data);
-        });
-      })
-    });
+    log.info("Sell market");
+    this.getBalance()
+    .then(res => {
+      let amount = res.btc_available;
+      return this.marketTrader.sellMarket(amount);
+    })
+    .then( res => {
+      log.info(res);
+      return res;
+    })
+    .catch(err=> {
+      log.err("Error sellMarket", err);
+    })
   }
 
   dailyBuy(){
@@ -113,6 +63,7 @@ class Trader {
     })
     .catch( err => {
       log.error(err);
+      return Utils.sendSms("Error buying", err);
     })
   }
 
@@ -158,14 +109,33 @@ class Trader {
       if(res){
         log.info("All orders cancelled: ");
         log.info(res);
-        return this.marketTrader.sellMarket();
+        return this.marketTrader.getBalance();
+      }
+    })
+    .then( res => {
+      if(res){
+        let amount = res.btc_available;
+        return this.marketTrader.sellMarket(amount);
       }
     })
     .then( res => {
       if(res){
         log.info("Sold Market: ");
         log.info(res);
-        return Utils.sendSms("Selling", res);
+        let amountSpent = this.marketTrader.lastDataOrder.options.amount_spent;
+
+        let amountSold = res.price * res.amount;
+        let amountReceived = amountSold * (1 - this.marketTrader.lastDataOrder.options.fee/100);
+        let gain = amountReceived - amountSpent;
+        amountSold = Utils.toFloat(amountSold);
+        amountReceived = Utils.toFloat(amountReceived);
+        gain = Utils.toFloat(gain);
+        log.info("amountSpent: ", amountSpent);
+        log.info("amountSold: ", amountSold);
+        log.info("amountReceived: ", amountReceived);
+        log.info("gain: ", gain);
+
+        return Utils.sendSms(`Selling ${gain}eur`, res);
       }
       return null;
     })
@@ -178,6 +148,10 @@ class Trader {
     .catch( err => {
       log.error(err);
     })
+  }
+
+  reset(){
+      this.saveTransactionToFile({});
   }
 
   run(){

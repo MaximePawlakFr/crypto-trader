@@ -15,6 +15,10 @@ class Utils {
     let msg = args.join('\n');
     return freemobile.send(msg, config.freeMobileCredentials);
   }
+
+  static toFloat(number, decimals){
+    return parseFloat(number.toFixed(decimals?decimals:2));
+  }
 }
 
 module.exports = Utils;
