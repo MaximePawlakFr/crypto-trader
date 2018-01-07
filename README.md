@@ -25,3 +25,7 @@ node index.js --action sellIfLowPrice --low 0.01
 ```
 node index.js --action sellIfLowPrice
 ```
+
+```
+rsync -avz --exclude-from=.gitignore ./ btc:btc-trader
+```
