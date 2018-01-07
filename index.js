@@ -1,6 +1,7 @@
 const Trader = require("./Trader");
 const argv = require('minimist')(process.argv.slice(2));
 const log = require("./log");
+const Utils = require("./Utils");
 
 const config = require("./config.local");
 log.debug("----- ----- ----- ----- ----- -----");
@@ -45,6 +46,12 @@ if(argv.action){
       })
       .catch( err => {
         log.error(err);
+      })
+      break;
+    case "sendSms":
+      Utils.sendSms("Test").
+      then(res => {
+        log.debug("Sms sent successfully.");
       })
       break;
     default:

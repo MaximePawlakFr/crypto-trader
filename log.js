@@ -6,7 +6,8 @@ let name = "btc-trader";
 var log = bunyan.createLogger({
   name,
   streams: [{
-    stream: process.stdout
+    stream: process.stdout,
+    level:"trace"
   },
     {
     type: 'rotating-file',
