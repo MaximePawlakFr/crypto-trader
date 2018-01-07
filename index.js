@@ -49,9 +49,12 @@ if(argv.action){
       })
       break;
     case "sendSms":
-      Utils.sendSms("Test").
-      then(res => {
+      Utils.sendSms("Test")
+      .then(res => {
         log.debug("Sms sent successfully.");
+      })
+      .catch( err => {
+        log.error("Failed to send sms", err);
       })
       break;
     default:
