@@ -179,12 +179,15 @@ class Trader {
       this.btc_available = res.btc_available;
       this.eur_available = res.eur_available;
       this.fee = res.fee;
+      log.debug("btc_available: ",this.btc_available);
+      log.debug("eur_available: ",this.eur_available);
+      log.debug("fee: ",this.fee);
       if(this.checkLastOrder(this.lastDataOrder)
         && moment.utc(this.lastDataOrder.buy_transaction.datetime).isSame(moment(), "day")){
-        console.log("IS SAME DAY");
+        log.info("Will not buy: IS SAME DAY");
         return null;
       }else{
-        console.log("not same day, let's buy !");
+        log.info("Not same day, let's buy !");
         return this.buy(this.eur_available);
       }
     })

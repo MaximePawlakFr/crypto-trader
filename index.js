@@ -43,6 +43,9 @@ if(argv.action){
           log.info(res);
         }
       })
+      .catch( err => {
+        log.error(err);
+      })
       break;
     default:
       log.info("## No action ##");
