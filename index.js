@@ -53,6 +53,13 @@ if(argv.action){
         if(res){
           log.info("Sold Market: ");
           log.info(res);
+          return Utils.sendSms(res);
+        }
+        return null;
+      })
+      .then(res => {
+        if(res){
+          log.debug("Sms sent successfully.");
         }
       })
       .catch( err => {
