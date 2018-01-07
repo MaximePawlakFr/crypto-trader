@@ -7,6 +7,16 @@
 ** if some buy / some sell, handle that
 
 ```
+last_data : {
+  options: { ... },
+  buy_order : { ... },
+  buy_transactions : { [...] },
+  sell_order: { ... },
+  sell_transactions : { [...] }
+}
+```
+
+```
 node index.js --action buy --high 0.015 --low 0.05
 ```
 

@@ -23,16 +23,25 @@ if(argv.action){
       log.info("#########");
       log.info("## Buy ##");
       log.info("#########");
-      trader.dailyBuy()
-      .then( data => {
-        return Utils.sendSms(data);
-      })
-      .then(res => {
-        log.debug("Sms sent successfully.");
-      })
-      .catch( err => {
-        log.error(err);
-      })
+      trader.dailyBuy();
+      break;
+    case "getOpenOrders":
+      trader.getOpenOrders()
+      .then( orders => {
+        log.debug(orders);
+      });
+      break;
+    case "getOpenBuyOrders":
+      trader.getOpenBuyOrders()
+      .then( orders => {
+        log.debug(orders);
+      });
+      break;
+    case "cancelOpenBuyOrders":
+      trader.cancelOpenBuyOrders();
+      break;
+    case "placeNewBuyOrder":
+      trader.placeNewBuyOrder();
       break;
     case "sellIfLowPrice":
       trader.checkIfLowSell()
