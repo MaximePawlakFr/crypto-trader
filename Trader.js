@@ -173,7 +173,7 @@ class Trader {
     let btc_available = 0;
     let eur_available = 0;
 
-    this.getBalance()
+    return this.getBalance()
     .then( res => {
       console.log(res);
       this.btc_available = res.btc_available;
@@ -192,7 +192,7 @@ class Trader {
       }
     })
     .then( data => {
-      console.log(data);
+      log.debug(data);
       if(!data || data.status == "error"){
         return;
       }
@@ -202,15 +202,13 @@ class Trader {
           market: this.market,
           high_percentage: this.high_percentage,
           low_percentage: this.low_percentage,
-
         },
         buy_transaction: data
       }
       this.saveTransactionToFile(transaction);
-    })
-    .catch(err => {
-      console.log(err);
-    })
+
+      return transaction;
+    });
   }
 
   run(){

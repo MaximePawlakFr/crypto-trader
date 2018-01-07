@@ -1,6 +1,6 @@
-const Trader = require("./Trader");
 const argv = require('minimist')(process.argv.slice(2));
 const log = require("./log");
+const Trader = require("./Trader");
 const Utils = require("./Utils");
 
 const config = require("./config.local");
@@ -20,8 +20,19 @@ if(argv.action){
 
   switch(argv.action){
     case "buy":
-      log.info("## buy ##");
-      trader.dailyBuy();
+      log.info("#########");
+      log.info("## Buy ##");
+      log.info("#########");
+      trader.dailyBuy()
+      .then( data => {
+        return Utils.sendSms(data);
+      })
+      .then(res => {
+        log.debug("Sms sent successfully.");
+      })
+      .catch( err => {
+        log.error(err);
+      })
       break;
     case "sellIfLowPrice":
       trader.checkIfLowSell()
@@ -52,6 +63,8 @@ if(argv.action){
       Utils.sendSms("Test")
       .then(res => {
         log.debug("Sms sent successfully.");
+        let t = new Trader()
+        Utils.sendSms(t.lastDataOrder);
       })
       .catch( err => {
         log.error("Failed to send sms", err);
