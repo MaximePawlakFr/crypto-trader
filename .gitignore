@@ -1,1 +1,5 @@
-2018-01-06_btc-trader.log
+.git
+node_modules/
+*btc-trader.log
+last_bid.json
+config.local.js
