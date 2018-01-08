@@ -1,7 +1,7 @@
-var Bitstamp = require('bitstamp');
+var Bitstamp = require('./bitstamp');
 const moment = require('moment');
 const config = require("./config.local");
-var bitstamp = new Bitstamp(config.key, config.secret, config.client_id);
+var bitstamp = new Bitstamp(config.key, config.secret, config.client_id, null, "https://www.bitstamp.net");
 var fs = require('fs');
 const log = require("./log");
 const Utils = require("./Utils");
@@ -27,27 +27,20 @@ class BitstampTrader {
   }
 
   getBalance(){
-    return new Promise((resolve, reject) => {
-      bitstamp.balance(this.market, (err, data) => {
-        resolve(data);
-      });
-    });
+      return bitstamp.balance(this.market);
   }
 
   getTicker(){
-    return new Promise((resolve, reject) => {
-      bitstamp.ticker(this.market, (err, ticker) => {
-        resolve(ticker);
-      });
-    });
+      return bitstamp.ticker(this.market);
+  }
+
+  getTickerHour(){
+      return bitstamp.ticker_hour(this.market);
   }
 
   getOpenOrders(){
-    return new Promise((resolve, reject) => {
-      bitstamp.open_orders(this.market, (err, data) => {
-        resolve(data);
-      });
-    });
+    console.log("getOpenOrders");
+    return bitstamp.open_orders(this.market);
   }
 
   getUserTransactions(){

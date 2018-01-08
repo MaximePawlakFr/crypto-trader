@@ -52,6 +52,9 @@ if(argv.action){
       trader.getBalance()
       .then(res => {
         log.info(res);
+      })
+      .catch(err => {
+        log.error(err);
       });
       break;
     case "sellMarket":
