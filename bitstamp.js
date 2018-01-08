@@ -38,22 +38,15 @@ Bitstamp.prototype._request = function(method, path, data, args) {
   console.log("_request");
   var timeout = this.timeout;
   var options = {
-    // host: this.host,
-    // path: path,
     url: this.host + path,
     method: method,
     headers: {
       'User-Agent': 'Mozilla/4.0 (compatible; Bitstamp node.js client)'
     },
-    // params: args,
     data,
     timeout
   };
 
-  if(method === 'post') {
-    // options.headers['Content-Length'] = data.length;
-    // options.headers['content-type'] = 'application/x-www-form-urlencoded';
-  }
   console.log(options);
   return axios(options)
   .then( res => {

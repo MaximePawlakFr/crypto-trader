@@ -85,7 +85,6 @@ test("getBalance", (done) => {
     expect(res.fee).toBe(0.24);
     done();
   })
-  .catch(err=> console.log(err))
 });
 
 test("getOpenOrders", () => {
