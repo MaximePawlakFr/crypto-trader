@@ -12,6 +12,7 @@
     "bitstamp": "^1.0.5",
     "bunyan": "^1.8.12",
     "freemobile-sms": "^1.1.0",
+    "jest": "^22.0.4",
     "minimist": "^1.2.0",
     "moment": "^2.20.1"
   }
