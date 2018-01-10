@@ -1,13 +1,16 @@
 const BitstampTrader = require("./BitstampTrader");
-var nock = require("nock");
-nock.disableNetConnect();
+const moxios = require('moxios')
+
+// var nock = require("nock");
+// nock.disableNetConnect();
 // nock.recorder.rec();
 
-beforeEach(() => {
-  nock("https://www.bitstamp.net/api/v2")
-    .log(console.log)
-    .get("/ticker/btceur/")
-    .reply(200, {
+beforeEach( () => {
+  moxios.install();
+  const host = "https://www.bitstamp.net/api/v2";
+  moxios.stubRequest(host + "/ticker/btceur/", {
+    status:200,
+    response: {
       high: "13615.00",
       last: "12380.00",
       timestamp: "1515431570",
@@ -17,9 +20,12 @@ beforeEach(() => {
       low: "11427.63",
       ask: "12380.00",
       open: "13404.75"
-    })
-    .get("/ticker_hour/btceur/")
-    .reply(200, {
+    }
+  })
+
+  moxios.stubRequest(host + "/ticker_hour/btceur/", {
+    status:200,
+    response: {
       high: "14615.00",
       last: "14380.00",
       timestamp: "1515431570",
@@ -29,9 +35,12 @@ beforeEach(() => {
       low: "11427.63",
       ask: "12380.00",
       open: "13404.75"
-    })
-    .post("/balance/btceur/")
-    .reply(200, {
+    }
+  })
+
+  moxios.stubRequest(host + "/balance/btceur/", {
+    status: 200,
+    response: {
       btc_available: "0.00000000",
       btc_balance: "0.00000000",
       btc_reserved: "0.00000000",
@@ -39,10 +48,59 @@ beforeEach(() => {
       eur_balance: "65.00",
       eur_reserved: "0.00",
       fee: 0.24
-    })
-    .post("/open_orders/btceur/")
-    .reply(200, []);
+    }
+  });
+
+  moxios.stubRequest(host + "/open_orders/btceur/", {
+    status:200,
+    response:[]
+  });
 });
+
+afterEach(function () {
+  // import and pass your custom axios instance to this method
+  moxios.uninstall()
+});
+  //
+  // nock("https://www.bitstamp.net/api/v2")
+  //   .log(console.log)
+  //   .get("/ticker/btceur/")
+  //   .reply(200, {
+  //     high: "13615.00",
+  //     last: "12380.00",
+  //     timestamp: "1515431570",
+  //     bid: "12379.99",
+  //     vwap: "12647.26",
+  //     volume: "4712.32892484",
+  //     low: "11427.63",
+  //     ask: "12380.00",
+  //     open: "13404.75"
+  //   })
+  //   .get("/ticker_hour/btceur/")
+  //   .reply(200, {
+  //     high: "14615.00",
+  //     last: "14380.00",
+  //     timestamp: "1515431570",
+  //     bid: "12379.99",
+  //     vwap: "12647.26",
+  //     volume: "4712.32892484",
+  //     low: "11427.63",
+  //     ask: "12380.00",
+  //     open: "13404.75"
+  //   })
+  //   .post("/balance/btceur/", {id: 1} )
+  //   .reply(200, {
+  //     btc_available: "0.00000000",
+  //     btc_balance: "0.00000000",
+  //     btc_reserved: "0.00000000",
+  //     eur_available: "65.00",
+  //     eur_balance: "65.00",
+  //     eur_reserved: "0.00",
+  //     fee: 0.24
+  //   })
+  //   .post("/open_orders/btceur/")
+  //   .reply(200, []);
+// });
 
 // nock.restore();
 
@@ -91,9 +149,7 @@ test("getOpenOrders", () => {
   return bt.getOpenOrders().then(res => {
     console.log(res);
     expect(res).toBeDefined();
-    expect(res.last).toBeDefined();
-    expect(res.last).toBe("13615.00");
-    expect(res.timestamp).toBeDefined();
+    expect(res).toEqual([]);
     return;
   });
 });
