@@ -254,89 +254,6 @@ class BitstampTrader {
       });
   }
 
-  run() {
-    let btc_available = 0;
-    let isPositive = null;
-    let openOrders = [];
-    let transactions = [];
-
-    this.getBalance()
-      .then(res => {
-        console.log(res);
-        this.btc_available = res.btc_available;
-        this.eur_available = res.eur_available;
-        this.fee = res.fee;
-        return this.checkIfPositive();
-      })
-      .then(res => {
-        console.log(res);
-        isPositive = res;
-        return this.getOpenOrders();
-      })
-      .then(res => {
-        console.log(res);
-        openOrders = res;
-        // return this.getUserTransactions();
-        // })
-        // .then( res => {
-        //   console.log(res);
-        //   transactions = res;
-
-        // If not positive
-        // are sell orders High or Low ?
-        openOrders
-          .filter(order => {
-            return order.type == 1;
-          })
-          .map(sellOrder => {
-            console.log("SellOrder", sellOrder);
-            if (sellOrder.price > this.lastDataOrder.price) {
-              console.log("is HIGH order");
-              // if(!isPositive){
-              //   this.cancelOrder(sellOrder.id)
-              //   .then( res => {
-              //     console.log("Cancel: ",res);
-              //   })
-              // }
-            } else {
-              console.log("is LOW order");
-            }
-          });
-
-        return this.checkIfLowSell();
-      })
-      .then(res => {
-        console.log(res);
-        if (res) {
-          // Cancel all openOrders and sell ALL
-          return this.sellMarket(this.btc_available);
-        }
-      })
-      .then(data => {
-        console.log(data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-    //   // return this.cancelAllOrders();
-    // })
-    // .then( res => {
-    //   console.log(res);
-    //   // return this.cancelAllOrders();
-    // })
-
-    // this.buy(0,0,0)
-    // .then( data => {
-    //   console.log(data);
-    // })
-    // .catch(err => {
-    //   console.log(err);
-    // })
-
-    // bitstamp.user_transactions(this.market, (function(err, data) {
-    //   console.log(data);
-    // }).bind(this));
-  }
 
   checkLastOrder(order) {
     if (order && order.buy_transaction && order.buy_transaction.datetime) {
@@ -344,26 +261,7 @@ class BitstampTrader {
     }
     return false;
   }
-  readTransactionFromFile() {
-    const content = fs.readFileSync("last_bid.json", "utf8");
-    let transaction = content;
-    try {
-      transaction = JSON.parse(content);
-    } catch (e) {
-      return {};
-    } finally {
-      return transaction;
-    }
-  }
 
-  saveTransactionToFile(data) {
-    fs.writeFileSync("last_bid.json", JSON.stringify(data), function(err) {
-      if (err) {
-        return log.error("Error writing file: ", err);
-      }
-      log.debug("The file was saved!");
-    });
-  }
 }
 
 module.exports = BitstampTrader;
