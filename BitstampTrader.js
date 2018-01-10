@@ -1,13 +1,31 @@
-var Bitstamp = require('./bitstamp');
-const moment = require('moment');
+var Bitstamp = require("./bitstamp");
+const moment = require("moment");
 const config = require("./config.local");
-var bitstamp = new Bitstamp(config.key, config.secret, config.client_id, null, "https://www.bitstamp.net");
-var fs = require('fs');
+var bitstamp = new Bitstamp(
+  config.key,
+  config.secret,
+  config.client_id,
+  null,
+  "https://www.bitstamp.net"
+);
+var fs = require("fs");
 const log = require("./log");
 const Utils = require("./Utils");
 
 class BitstampTrader {
-  constructor( options={} ){
+  static DEFAULT_HIGH_PERCENTAGE() {
+    return 0.015;
+  }
+
+  static DEFAULT_LOW_PERCENTAGE() {
+    return -0.04;
+  }
+
+  static DEFAULT_MARKET() {
+    return "btceur";
+  }
+
+  constructor(options = {}) {
     log.debug("-- BitstampTrader --");
     log.debug("Options: ", options);
 
@@ -20,142 +38,128 @@ class BitstampTrader {
     log.debug("this.high_percentage: ", this.high_percentage);
     log.debug("this.low_percentage: ", this.low_percentage);
 
-    this.lastDataOrder = this.readTransactionFromFile();
-    log.debug("this.lastDataOrder: ", this.lastDataOrder);
-
-    log.debug("-- /BitstampTrader --")
+    log.debug("-- /BitstampTrader --");
   }
 
-  getBalance(){
-      return bitstamp.balance(this.market);
+  getBalance() {
+    return bitstamp.balance(this.market);
   }
 
-  getTicker(){
-      return bitstamp.ticker(this.market);
+  getTicker() {
+    return bitstamp.ticker(this.market);
   }
 
-  getTickerHour(){
-      return bitstamp.ticker_hour(this.market);
+  getTickerHour() {
+    return bitstamp.ticker_hour(this.market);
   }
 
-  getOpenOrders(){
-    console.log("getOpenOrders");
+  getOpenOrders() {
     return bitstamp.open_orders(this.market);
   }
 
-  getUserTransactions(){
-    return new Promise((resolve, reject) => {
-      bitstamp.user_transactions(this.market, (err, data) => {
-        resolve(data);
-      });
-    });
+  getUserTransactions() {
+    return bitstamp.user_transactions(this.market);
   }
 
-  cancelOrder(id){
-    return new Promise((resolve, reject) => {
-      bitstamp.cancel_order(id, (err, data) => {
-        resolve(data);
-      });
-    });
+  cancelOrder(id) {
+    return bitstamp.cancel_order(id);
   }
 
-  cancelAllOrders(){
-    return new Promise((resolve, reject) => {
-      if(this.isDebug){
-        resolve(true);
-        return;
-      }
-      bitstamp.cancel_all_orders((err, data) => {
-        resolve(data);
-      });
-    });
+  cancelAllOrders() {
+    return bitstamp.cancel_all_orders();
   }
 
-  checkIfLowSell(){
-    return this.getTicker()
-    .then( ticker => {
+  checkIfLowSell() {
+    return this.getTicker().then(ticker => {
       let res = false;
-      this.low_price = (1 + this.low_percentage) * this.lastDataOrder.buy_transaction.price;
+      this.low_price =
+        (1 + this.low_percentage) * this.lastDataOrder.buy_transaction.price;
       this.low_price = parseFloat(this.low_price.toFixed(2));
-      if(ticker.last < this.low_price){
+      if (ticker.last < this.low_price) {
         res = true;
       }
-      let percentage = (ticker.last - this.lastDataOrder.buy_transaction.price)/this.lastDataOrder.buy_transaction.price;
+      let percentage =
+        (ticker.last - this.lastDataOrder.buy_transaction.price) /
+        this.lastDataOrder.buy_transaction.price;
       percentage = (percentage * 100).toFixed(2);
       log.info(`CheckIfLowSell: ${res}`);
       log.info(`Current %: ${percentage}%`);
       log.info(`Actual/Low_price ${ticker.last}/${this.low_price}`);
-      return res
-    })
+      return res;
+    });
   }
 
-  getOpenBuyOrders(){
-    return this.getOpenOrders()
-    .then( orders => {
-      return orders.filter( order => {
+  getOpenBuyOrders() {
+    return this.getOpenOrders().then(orders => {
+      return orders.filter(order => {
         return order.type == 0;
-      })
-    })
+      });
+    });
   }
-
-
 
   buy(balance) {
-    return new Promise((resolve, reject)=> {
-      this.getTicker()
-      .then( ticker => {
+    return new Promise((resolve, reject) => {
+      this.getTicker().then(ticker => {
         this.limit_price = (1 + this.high_percentage) * ticker.last;
         this.limit_price = Utils.toFloat(this.limit_price);
         this.price = ticker.last;
         this.balance = balance;
         let fee = this.fee + 0.01;
-        this.amountSpent = balance * ( 1 - fee/100);
+        this.amountSpent = balance * (1 - fee / 100);
         this.amount = parseFloat((this.amountSpent / this.price).toFixed(8));
         this.amountSpent = Utils.toFloat(this.amountSpent);
         log.info("price: ", this.price);
         log.info("limit_price: ", this.limit_price);
         log.info("amount: ", this.amount);
 
-        if(this.isDebug){
+        if (this.isDebug) {
           resolve(true);
           return;
         }
-        bitstamp.buy(this.market, this.amount, this.price, this.limit_price, (err, data)=>{
-          if(err){
-            reject(err);
+        bitstamp.buy(
+          this.market,
+          this.amount,
+          this.price,
+          this.limit_price,
+          (err, data) => {
+            if (err) {
+              reject(err);
+            }
+            resolve(data);
           }
-          resolve(data);
-        });
-      })
+        );
+      });
     });
   }
 
   sellMarket(amount) {
-    return new Promise((resolve, reject)=> {
-        if(this.isDebug){
-          resolve(true);
-          return;
+    return new Promise((resolve, reject) => {
+      if (this.isDebug) {
+        resolve(true);
+        return;
+      }
+      bitstamp.sellMarket(this.market, amount, (err, data) => {
+        if (err) {
+          reject(err);
         }
-        bitstamp.sellMarket(this.market, amount, (err, data)=>{
-          if(err){
-            reject(err);
-          }
-          resolve(data);
-        });
+        resolve(data);
       });
+    });
   }
 
-  getAmountSpent(){
-    let amount = this.lastDataOrder.buy_transaction.price * this.lastDataOrder.buy_transaction.amount;
+  getAmountSpent() {
+    let amount =
+      this.lastDataOrder.buy_transaction.price *
+      this.lastDataOrder.buy_transaction.amount;
     amount = parseFloat(amount.toFixed(2));
     return amount;
   }
 
-  getPotentialGain(){
+  getPotentialGain() {
     let amountSpent = this.amountSpent;
 
     let limit_price = this.limit_price;
-    let amountReceived = limit_price * this.amount * (1 - this.fee/100);
+    let amountReceived = limit_price * this.amount * (1 - this.fee / 100);
     amountReceived = Utils.toFloat(amountReceived);
     let gain = amountReceived - amountSpent;
     gain = Utils.toFloat(gain);
@@ -167,148 +171,151 @@ class BitstampTrader {
   }
 
   buyMarket(balance) {
-    return new Promise((resolve, reject)=> {
-      this.getTicker()
-      .then( ticker => {
+    return new Promise((resolve, reject) => {
+      this.getTicker().then(ticker => {
         console.log(ticker);
         let price = ticker.last;
         let fee = this.fee + 0.01;
-        let amountSpent = parseFloat( (balance * (1 - fee/100)).toFixed(2));
+        let amountSpent = parseFloat((balance * (1 - fee / 100)).toFixed(2));
         let amount = parseFloat((amountSpent / price).toFixed(8));
         console.log("Balance: ", amountSpent);
         console.log("Price: ", price);
         console.log("Amount: ", amount);
 
-        if(this.isDebug){
+        if (this.isDebug) {
           resolve(true);
         }
-        bitstamp.buyMarket(this.market, amount, (err, data)=>{
-          if(err){
+        bitstamp.buyMarket(this.market, amount, (err, data) => {
+          if (err) {
             reject(err);
           }
           resolve(data);
         });
-      })
+      });
     });
   }
 
-  dailyBuy(){
+  dailyBuy() {
     let btc_available = 0;
     let eur_available = 0;
 
     return this.getBalance()
-    .then( res => {
-      console.log(res);
-      this.btc_available = res.btc_available;
-      this.eur_available = res.eur_available;
-      this.fee = res.fee;
-      log.debug("btc_available: ",this.btc_available);
-      log.debug("eur_available: ",this.eur_available);
-      log.debug("fee: ",this.fee);
-      if(this.checkLastOrder(this.lastDataOrder)
-        && moment.utc(this.lastDataOrder.buy_transaction.datetime).isSame(moment(), "day")){
-        log.info("Will not buy: IS SAME DAY");
-        return null;
-      }else{
-        log.info("Not same day, let's buy !");
-        return this.buy(this.eur_available);
-      }
-    })
-    .then( data => {
-      log.debug(data);
-      if(!data || data.status == "error"){
-        throw (data);
-        return;
-      }
+      .then(res => {
+        console.log(res);
+        this.btc_available = res.btc_available;
+        this.eur_available = res.eur_available;
+        this.fee = res.fee;
+        log.debug("btc_available: ", this.btc_available);
+        log.debug("eur_available: ", this.eur_available);
+        log.debug("fee: ", this.fee);
+        if (
+          this.checkLastOrder(this.lastDataOrder) &&
+          moment
+            .utc(this.lastDataOrder.buy_transaction.datetime)
+            .isSame(moment(), "day")
+        ) {
+          log.info("Will not buy: IS SAME DAY");
+          return null;
+        } else {
+          log.info("Not same day, let's buy !");
+          return this.buy(this.eur_available);
+        }
+      })
+      .then(data => {
+        log.debug(data);
+        if (!data || data.status == "error") {
+          throw data;
+          return;
+        }
 
-      let transaction = {
-        options:{
-          market: this.market,
-          high_percentage: this.high_percentage,
-          low_percentage: this.low_percentage,
-          fee: this.fee,
-          amount_spent: this.eur_available,
-          limit_price: this.limit_price,
-          price: this.price
-        },
-        buy_transaction: data
-      }
-      this.saveTransactionToFile(transaction);
+        let transaction = {
+          options: {
+            market: this.market,
+            high_percentage: this.high_percentage,
+            low_percentage: this.low_percentage,
+            fee: this.fee,
+            amount_spent: this.eur_available,
+            limit_price: this.limit_price,
+            price: this.price
+          },
+          buy_transaction: data
+        };
+        this.saveTransactionToFile(transaction);
 
-      return transaction;
-    });
+        return transaction;
+      });
   }
 
-  run(){
+  run() {
     let btc_available = 0;
     let isPositive = null;
     let openOrders = [];
     let transactions = [];
 
-
     this.getBalance()
-    .then( res => {
-      console.log(res);
-      this.btc_available = res.btc_available;
-      this.eur_available = res.eur_available;
-      this.fee = res.fee;
-    return this.checkIfPositive()
-    })
-    .then( res => {
-      console.log(res);
-      isPositive = res;
-      return this.getOpenOrders();
-    })
-    .then( res => {
-      console.log(res);
-      openOrders = res;
-      // return this.getUserTransactions();
-    // })
-    // .then( res => {
-    //   console.log(res);
-    //   transactions = res;
+      .then(res => {
+        console.log(res);
+        this.btc_available = res.btc_available;
+        this.eur_available = res.eur_available;
+        this.fee = res.fee;
+        return this.checkIfPositive();
+      })
+      .then(res => {
+        console.log(res);
+        isPositive = res;
+        return this.getOpenOrders();
+      })
+      .then(res => {
+        console.log(res);
+        openOrders = res;
+        // return this.getUserTransactions();
+        // })
+        // .then( res => {
+        //   console.log(res);
+        //   transactions = res;
 
-      // If not positive
-      // are sell orders High or Low ?
-      openOrders.filter( order => {
-        return order.type == 1
-      }).map( sellOrder => {
-        console.log("SellOrder", sellOrder);
-        if(sellOrder.price > this.lastDataOrder.price){
-          console.log("is HIGH order");
-          // if(!isPositive){
-          //   this.cancelOrder(sellOrder.id)
-          //   .then( res => {
-          //     console.log("Cancel: ",res);
-          //   })
-          // }
-        }else{
-          console.log("is LOW order");
+        // If not positive
+        // are sell orders High or Low ?
+        openOrders
+          .filter(order => {
+            return order.type == 1;
+          })
+          .map(sellOrder => {
+            console.log("SellOrder", sellOrder);
+            if (sellOrder.price > this.lastDataOrder.price) {
+              console.log("is HIGH order");
+              // if(!isPositive){
+              //   this.cancelOrder(sellOrder.id)
+              //   .then( res => {
+              //     console.log("Cancel: ",res);
+              //   })
+              // }
+            } else {
+              console.log("is LOW order");
+            }
+          });
+
+        return this.checkIfLowSell();
+      })
+      .then(res => {
+        console.log(res);
+        if (res) {
+          // Cancel all openOrders and sell ALL
+          return this.sellMarket(this.btc_available);
         }
       })
-
-      return this.checkIfLowSell();
-    })
-    .then( res => {
-      console.log(res);
-      if(res){
-        // Cancel all openOrders and sell ALL
-        return this.sellMarket(this.btc_available);
-      }
-    })
-    .then( data => {
-      console.log(data);
-    })
-    .catch(err => {
-      console.log(err);
-    })
+      .then(data => {
+        console.log(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
     //   // return this.cancelAllOrders();
     // })
     // .then( res => {
     //   console.log(res);
     //   // return this.cancelAllOrders();
     // })
-
 
     // this.buy(0,0,0)
     // .then( data => {
@@ -323,34 +330,32 @@ class BitstampTrader {
     // }).bind(this));
   }
 
-
-  checkLastOrder(order){
-    if(order && order.buy_transaction && order.buy_transaction.datetime){
+  checkLastOrder(order) {
+    if (order && order.buy_transaction && order.buy_transaction.datetime) {
       return true;
     }
-    return false
+    return false;
   }
-  readTransactionFromFile(){
-    const content = fs.readFileSync('last_bid.json','utf8');
+  readTransactionFromFile() {
+    const content = fs.readFileSync("last_bid.json", "utf8");
     let transaction = content;
-    try{
+    try {
       transaction = JSON.parse(content);
-    }catch(e){
+    } catch (e) {
       return {};
-    }finally{
+    } finally {
       return transaction;
     }
   }
 
-  saveTransactionToFile(data){
+  saveTransactionToFile(data) {
     fs.writeFileSync("last_bid.json", JSON.stringify(data), function(err) {
-      if(err) {
+      if (err) {
         return log.error("Error writing file: ", err);
       }
       log.debug("The file was saved!");
     });
   }
 }
-
 
 module.exports = BitstampTrader;

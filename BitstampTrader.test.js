@@ -51,6 +51,16 @@ beforeEach( () => {
     status:200,
     response:[]
   });
+
+  moxios.stubRequest(host + "/user_transactions/btceur/", {
+    status:200,
+    response:[]
+  });
+
+  moxios.stubRequest(host + "/cancel_order/btceur/", {
+    status:200,
+    response: true
+  });
 });
 
 afterEach(function () {
@@ -99,6 +109,23 @@ test("getBalance", (done) => {
 
 test("getOpenOrders", () => {
   return bt.getOpenOrders().then(res => {
+    expect(res).toBeDefined();
+    expect(res).toEqual([]);
+    return;
+  });
+});
+
+test("getUserTransactions", () => {
+  return bt.getOpenOrders().then(res => {
+    expect(res).toBeDefined();
+    expect(res).toEqual([]);
+    return;
+  });
+});
+
+
+test("cancelOrder", () => {
+  return bt.cancelOrder(null).then(res => {
     expect(res).toBeDefined();
     expect(res).toEqual([]);
     return;

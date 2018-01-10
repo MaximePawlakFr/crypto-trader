@@ -125,7 +125,7 @@ Bitstamp.prototype.transactions = function(market, options, callback) {
     callback = options;
     options = undefined;
   }
-  this._get(market, 'transactions', callback, options);
+  return this._get(market, 'transactions', callback, options);
 }
 
 Bitstamp.prototype.ticker = function(market) {
@@ -146,7 +146,7 @@ Bitstamp.prototype.order_book = function(market, group, callback) {
     options = group;
   else
     options = {group: group};
-  this._get(market, 'order_book', callback, options);
+  return this._get(market, 'order_book', callback, options);
 }
 
 // This API calls are removed from the documentation as of `Sat Jun 11 2016 10:10:07`
@@ -172,7 +172,7 @@ Bitstamp.prototype.user_transactions = function(market, options, callback) {
     callback = options;
     options = undefined;
   }
-  this._post(market, 'user_transactions', callback, options);
+  return this._post(market, 'user_transactions', callback, options);
 }
 
 Bitstamp.prototype.open_orders = function(market) {
@@ -180,99 +180,99 @@ Bitstamp.prototype.open_orders = function(market) {
 }
 
 Bitstamp.prototype.order_status = function (id, callback) {
-  this._post(null, 'order_status', callback, {id: id}, true);
+  return this._post(null, 'order_status', callback, {id: id}, true);
 };
 
 Bitstamp.prototype.cancel_order = function(id, callback) {
-  this._post(null, 'cancel_order', callback, {id: id}, true);
+  return this._post(null, 'cancel_order', callback, {id: id}, true);
 }
 
 Bitstamp.prototype.cancel_all_orders = function(callback) {
-  this._post(null, 'cancel_all_orders', callback, null, true);
+  return this._post(null, 'cancel_all_orders', callback, null, true);
 }
 
-Bitstamp.prototype.buy = function(market, amount, price, limit_price, callback) {
-  this._post(market, 'buy', callback, {
+Bitstamp.prototype.buy = function(market, amount, price, limit_price) {
+  return this._post(market, 'buy', {
     amount: amount,
     price: price,
     limit_price: limit_price
   });
 }
 
-Bitstamp.prototype.buyMarket = function(market, amount, callback) {
-  this._post(market, 'buy/market', callback, {
+Bitstamp.prototype.buyMarket = function(market, amount) {
+  return this._post(market, 'buy/market', {
     amount: amount
   });
 }
 
-Bitstamp.prototype.sell = function(market, amount, price, limit_price, callback) {
-  this._post(market, 'sell', callback, {
+Bitstamp.prototype.sell = function(market, amount, price, limit_price) {
+  return this._post(market, 'sell', {
     amount: amount,
     price: price,
     limit_price: limit_price
   });
 }
 
-Bitstamp.prototype.sellMarket = function(market, amount, callback) {
-  this._post(market, 'sell/market', callback, {
+Bitstamp.prototype.sellMarket = function(market, amount) {
+  return this._post(market, 'sell/market', {
     amount: amount
   });
 }
 
-Bitstamp.prototype.withdrawal_requests = function(callback) {
-  this._post(null, 'withdrawal_requests', callback, null, true);
+Bitstamp.prototype.withdrawal_requests = function() {
+  return this._post(null, 'withdrawal_requests', null, true);
 }
 
-Bitstamp.prototype.bitcoin_withdrawal = function(amount, address, instant, callback) {
-  this._post(null, 'bitcoin_withdrawal', callback, {
+Bitstamp.prototype.bitcoin_withdrawal = function(amount, address, instant) {
+  return this._post(null, 'bitcoin_withdrawal', {
     amount: amount,
     address: address,
     instant: instant
   }, true);
 }
 
-Bitstamp.prototype.xrp_withdrawal = function(amount, address, destination_tag, callback) {
-  this._post(null, 'xrp_withdrawal', callback, {
+Bitstamp.prototype.xrp_withdrawal = function(amount, address, destination_tag) {
+  return this._post(null, 'xrp_withdrawal', {
     amount: amount,
     address: address,
     destination_tag: destination_tag
   }, true);
 }
 
-Bitstamp.prototype.bitcoin_deposit_address = function(callback) {
-  this._post(null, 'bitcoin_deposit_address', callback, null, true);
+Bitstamp.prototype.bitcoin_deposit_address = function() {
+  return this._post(null, 'bitcoin_deposit_address', null, true);
 }
 
-Bitstamp.prototype.unconfirmed_btc = function(callback) {
-  this._post(null, 'unconfirmed_btc', callback, null, true);
+Bitstamp.prototype.unconfirmed_btc = function() {
+  return this._post(null, 'unconfirmed_btc', null, true);
 }
 
 
 // the API documentation is wrong as of `Sat Jun 11 2016 10:10:07`.
 // It doesn't corectly list this call. Therefor not sure if all
 // arguments are correct.
-Bitstamp.prototype.ripple_withdrawal = function(amount, address, currency, callback) {
-  this._post(null, 'ripple_withdrawal', callback, {
+Bitstamp.prototype.ripple_withdrawal = function(amount, address, currency) {
+  return this._post(null, 'ripple_withdrawal', {
     amount: amount,
     address: address,
     currency: currency
   }, true);
 }
 
-Bitstamp.prototype.ripple_address = function(callback) {
-  this._post(null, 'ripple_address', callback, null, true);
+Bitstamp.prototype.ripple_address = function() {
+  return this._post(null, 'ripple_address', null, true);
 }
 
-Bitstamp.prototype.transfer_to_main = function(amount, currency, subAccount, callback) {
-  this._post(null, 'transfer-to-main', callback, {
+Bitstamp.prototype.transfer_to_main = function(amount, currency, subAccount) {
+  return this._post(null, 'transfer-to-main', {
     amount: amount,
     currency: currency,
     subAccount: subAccount
   }, true);
 }
 
-Bitstamp.prototype.transfer_from_main = function(amount, currency, subAccount, callback) {
-  this._post(null, 'transfer-from-main', callback, {
+Bitstamp.prototype.transfer_from_main = function(amount, currency, subAccount) {
+  return this._post(null, 'transfer-from-main', {
     amount: amount,
     currency: currency,
     subAccount: subAccount
