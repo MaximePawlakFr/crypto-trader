@@ -90,7 +90,6 @@ Bitstamp.prototype._get = function(market, action, args) {
 Bitstamp.prototype._post = function(market, action, args, legacy_endpoint) {
   if(!this.key || !this.secret || !this.client_id)
     return (new Error('Must provide key, secret and client ID to make this API request.'));
-
   if(legacy_endpoint)
     var path = '/api/' + action + '/';
   else {
@@ -167,28 +166,24 @@ Bitstamp.prototype.balance = function(market) {
   return this._post(market, 'balance');
 }
 
-Bitstamp.prototype.user_transactions = function(market, options, callback) {
-  if(!callback) {
-    callback = options;
-    options = undefined;
-  }
-  return this._post(market, 'user_transactions', callback, options);
+Bitstamp.prototype.user_transactions = function(market, options) {
+  return this._post(market, 'user_transactions', options);
 }
 
 Bitstamp.prototype.open_orders = function(market) {
   return this._post(market, 'open_orders');
 }
 
-Bitstamp.prototype.order_status = function (id, callback) {
-  return this._post(null, 'order_status', callback, {id: id}, true);
+Bitstamp.prototype.order_status = function (id) {
+  return this._post(null, 'order_status', {id: id}, true);
 };
 
-Bitstamp.prototype.cancel_order = function(id, callback) {
-  return this._post(null, 'cancel_order', callback, {id: id}, true);
+Bitstamp.prototype.cancel_order = function(id) {
+  return this._post(null, 'cancel_order', {id: id});
 }
 
-Bitstamp.prototype.cancel_all_orders = function(callback) {
-  return this._post(null, 'cancel_all_orders', callback, null, true);
+Bitstamp.prototype.cancel_all_orders = function() {
+  return this._post(null, 'cancel_all_orders', null, true);
 }
 
 Bitstamp.prototype.buy = function(market, amount, price, limit_price) {

@@ -57,7 +57,7 @@ beforeEach( () => {
     response:[]
   });
 
-  moxios.stubRequest(host + "/cancel_order/btceur/", {
+  moxios.stubRequest(host + "/cancel_order/", {
     status:200,
     response: true
   });
@@ -125,9 +125,9 @@ test("getUserTransactions", () => {
 
 
 test("cancelOrder", () => {
-  return bt.cancelOrder(null).then(res => {
+  return bt.cancelOrder(1).then(res => {
     expect(res).toBeDefined();
-    expect(res).toEqual([]);
+    expect(res).toEqual(true);//FIXME in v2 it's changed.
     return;
   });
 });
