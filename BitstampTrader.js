@@ -73,8 +73,14 @@ class BitstampTrader {
     return bitstamp.cancel_all_orders();
   }
 
-  buy(amount, price, limit_price){
+  buy(amount, price, limit_price) {
     return bitstamp.buy(this.market, amount, price, limit_price);
+  }
+
+  buyAll() {
+    return this.getBalance().then(res => {
+      return this.buy(res.eur_available); // FIXME with other currencies
+    });
   }
 
   checkIfLowSell() {
@@ -254,7 +260,6 @@ class BitstampTrader {
       });
   }
 
-
   checkLastOrder(order) {
     if (order && order.buy_transaction && order.buy_transaction.datetime) {
       return true;
@@ -262,6 +267,13 @@ class BitstampTrader {
     return false;
   }
 
+  isLowerThanLowLimit() {}
+
+  isHigherThanHighLimit() {}
+
+  isBuyingDone() {}
+
+  isSellingDone() {}
 }
 
 module.exports = BitstampTrader;
