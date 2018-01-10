@@ -35,7 +35,6 @@ var Bitstamp = function(key, secret, client_id, timeout, host) {
 axios.defaults.adatper = require('axios/lib/adapters/http');
 
 Bitstamp.prototype._request = function(method, path, data, args) {
-  console.log("_request");
   var timeout = this.timeout;
   var options = {
     url: this.host + path,
@@ -47,7 +46,6 @@ Bitstamp.prototype._request = function(method, path, data, args) {
     timeout
   };
 
-  console.log(options);
   return axios(options)
   .then( res => {
     return res.data;
@@ -90,7 +88,6 @@ Bitstamp.prototype._get = function(market, action, args) {
 }
 
 Bitstamp.prototype._post = function(market, action, args, legacy_endpoint) {
-  console.log("_post");
   if(!this.key || !this.secret || !this.client_id)
     return (new Error('Must provide key, secret and client ID to make this API request.'));
 
@@ -116,7 +113,6 @@ Bitstamp.prototype._post = function(market, action, args, legacy_endpoint) {
 
   args = _.compactObject(args);
   var data = querystring.stringify(args);
-
   return this._request('post', path, data, args);
 }
 
@@ -180,7 +176,6 @@ Bitstamp.prototype.user_transactions = function(market, options, callback) {
 }
 
 Bitstamp.prototype.open_orders = function(market) {
-  console.log("open_orders");
   return this._post(market, 'open_orders');
 }
 

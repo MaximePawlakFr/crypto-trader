@@ -1,10 +1,6 @@
 const BitstampTrader = require("./BitstampTrader");
 const moxios = require('moxios')
 
-// var nock = require("nock");
-// nock.disableNetConnect();
-// nock.recorder.rec();
-
 beforeEach( () => {
   moxios.install();
   const host = "https://www.bitstamp.net/api/v2";
@@ -58,51 +54,8 @@ beforeEach( () => {
 });
 
 afterEach(function () {
-  // import and pass your custom axios instance to this method
   moxios.uninstall()
 });
-  //
-  // nock("https://www.bitstamp.net/api/v2")
-  //   .log(console.log)
-  //   .get("/ticker/btceur/")
-  //   .reply(200, {
-  //     high: "13615.00",
-  //     last: "12380.00",
-  //     timestamp: "1515431570",
-  //     bid: "12379.99",
-  //     vwap: "12647.26",
-  //     volume: "4712.32892484",
-  //     low: "11427.63",
-  //     ask: "12380.00",
-  //     open: "13404.75"
-  //   })
-  //   .get("/ticker_hour/btceur/")
-  //   .reply(200, {
-  //     high: "14615.00",
-  //     last: "14380.00",
-  //     timestamp: "1515431570",
-  //     bid: "12379.99",
-  //     vwap: "12647.26",
-  //     volume: "4712.32892484",
-  //     low: "11427.63",
-  //     ask: "12380.00",
-  //     open: "13404.75"
-  //   })
-  //   .post("/balance/btceur/", {id: 1} )
-  //   .reply(200, {
-  //     btc_available: "0.00000000",
-  //     btc_balance: "0.00000000",
-  //     btc_reserved: "0.00000000",
-  //     eur_available: "65.00",
-  //     eur_balance: "65.00",
-  //     eur_reserved: "0.00",
-  //     fee: 0.24
-  //   })
-  //   .post("/open_orders/btceur/")
-  //   .reply(200, []);
-// });
-
-// nock.restore();
 
 test("adds 1 + 2 to equal 3", () => {
   expect(1 + 2).toBe(3);
@@ -136,7 +89,6 @@ test("getTickerHour", () => {
 test("getBalance", (done) => {
   const bt = new BitstampTrader();
   return bt.getBalance().then(res => {
-    console.log(res);
     expect(res).toBeDefined();
     expect(res.eur_available).toBeDefined();
     expect(res.eur_available).toBe("65.00");
@@ -147,7 +99,6 @@ test("getBalance", (done) => {
 
 test("getOpenOrders", () => {
   return bt.getOpenOrders().then(res => {
-    console.log(res);
     expect(res).toBeDefined();
     expect(res).toEqual([]);
     return;

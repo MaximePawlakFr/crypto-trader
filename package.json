@@ -15,10 +15,12 @@
     "jest": "^22.0.4",
     "minimist": "^1.2.0",
     "moment": "^2.20.1",
-    "nock": "^9.1.5"
+    "moxios": "^0.4.0"
   },
   "devDependencies": {
     "axios": "^0.17.1"
   },
-  "jest": { "testEnvironment": "node" }
+  "jest": {
+    "testEnvironment": "node"
+  }
 }
