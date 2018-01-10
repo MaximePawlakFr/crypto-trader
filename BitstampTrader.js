@@ -69,6 +69,14 @@ class BitstampTrader {
     return bitstamp.cancel_all_orders();
   }
 
+  cancelAllOrders() {
+    return bitstamp.cancel_all_orders();
+  }
+
+  buy(amount, price, limit_price){
+    return bitstamp.buy(this.market, amount, price, limit_price);
+  }
+
   checkIfLowSell() {
     return this.getTicker().then(ticker => {
       let res = false;
@@ -97,7 +105,7 @@ class BitstampTrader {
     });
   }
 
-  buy(balance) {
+  buy2(balance) {
     return new Promise((resolve, reject) => {
       this.getTicker().then(ticker => {
         this.limit_price = (1 + this.high_percentage) * ticker.last;

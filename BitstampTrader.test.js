@@ -1,11 +1,11 @@
 const BitstampTrader = require("./BitstampTrader");
-const moxios = require('moxios')
+const moxios = require("moxios");
 
-beforeEach( () => {
+beforeEach(() => {
   moxios.install();
   const host = "https://www.bitstamp.net/api/v2";
   moxios.stubRequest(host + "/ticker/btceur/", {
-    status:200,
+    status: 200,
     response: {
       high: "13615.00",
       last: "12380.00",
@@ -17,10 +17,10 @@ beforeEach( () => {
       ask: "12380.00",
       open: "13404.75"
     }
-  })
+  });
 
   moxios.stubRequest(host + "/ticker_hour/btceur/", {
-    status:200,
+    status: 200,
     response: {
       high: "14615.00",
       last: "14380.00",
@@ -32,7 +32,7 @@ beforeEach( () => {
       ask: "12380.00",
       open: "13404.75"
     }
-  })
+  });
 
   moxios.stubRequest(host + "/balance/btceur/", {
     status: 200,
@@ -48,23 +48,39 @@ beforeEach( () => {
   });
 
   moxios.stubRequest(host + "/open_orders/btceur/", {
-    status:200,
-    response:[]
+    status: 200,
+    response: []
   });
 
   moxios.stubRequest(host + "/user_transactions/btceur/", {
-    status:200,
-    response:[]
+    status: 200,
+    response: []
   });
 
   moxios.stubRequest(host + "/cancel_order/", {
-    status:200,
+    status: 200,
     response: true
+  });
+
+  moxios.stubRequest(host + "/cancel_all_orders/", {
+    status: 200,
+    response: true
+  });
+
+  moxios.stubRequest(host + "/buy/btceur/", {
+    status: 200,
+    response: {
+      price: "13350.20",
+      amount: "0.00509577",
+      type: "0",
+      id: "734135321",
+      datetime: "2018-01-07 21:06:29.628223"
+    }
   });
 });
 
-afterEach(function () {
-  moxios.uninstall()
+afterEach(function() {
+  moxios.uninstall();
 });
 
 test("adds 1 + 2 to equal 3", () => {
@@ -96,7 +112,7 @@ test("getTickerHour", () => {
   });
 });
 
-test("getBalance", (done) => {
+test("getBalance", done => {
   const bt = new BitstampTrader();
   return bt.getBalance().then(res => {
     expect(res).toBeDefined();
@@ -104,7 +120,7 @@ test("getBalance", (done) => {
     expect(res.eur_available).toBe("65.00");
     expect(res.fee).toBe(0.24);
     done();
-  })
+  });
 });
 
 test("getOpenOrders", () => {
@@ -123,11 +139,28 @@ test("getUserTransactions", () => {
   });
 });
 
-
 test("cancelOrder", () => {
   return bt.cancelOrder(1).then(res => {
     expect(res).toBeDefined();
-    expect(res).toEqual(true);//FIXME in v2 it's changed.
+    expect(res).toEqual(true); //FIXME in v2 it's changed.
+    return;
+  });
+});
+
+test("cancelAllOrders", () => {
+  return bt.cancelOrder(1).then(res => {
+    expect(res).toBeDefined();
+    expect(res).toEqual(true);
+    return;
+  });
+});
+
+test("buy", () => {
+  return bt.buy(0.00509577, 13350.20, 14000 ).then(res => {
+    expect(res).toBeDefined();
+    expect(res.price).toBe("13350.20");
+    expect(res.amount).toBe("0.00509577");
+    expect(res.type).toBe("0");
     return;
   });
 });
